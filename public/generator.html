@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Plan — ForgeFit</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .gen-layout { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start; }
+    .plan-day { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
+    .plan-day-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background: var(--bg-raised); border-bottom: 1px solid var(--border); cursor: pointer; }
+    .plan-day-title { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: 0.04em; }
+    .plan-day-body { padding: 0.75rem 1.25rem; }
+    .plan-exercise-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.75rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+    .plan-exercise-row:last-child { border-bottom: none; }
+    .plan-exercise-name { font-weight: 600; }
+    .plan-exercise-meta { font-size: 0.78rem; color: var(--text-muted); text-align: right; }
+    .rest-day { display: flex; align-items: center; gap: 0.5rem; padding: 1rem 0; color: var(--text-muted); font-size: 0.875rem; }
+    .gen-spinner { width: 64px; height: 64px; border: 4px solid var(--bg-raised); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    .chip-select { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip { padding: 0.4rem 0.875rem; border: 1.5px solid var(--border); border-radius: 99px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: border-color 0.15s, background 0.15s, color 0.15s; user-select: none; }
+    .chip.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+    .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; }
+    .tip-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.875rem 1rem; font-size: 0.85rem; color: var(--text-secondary); }
+    @media(max-width:900px){ .gen-layout{ grid-template-columns:1fr; } }
+    @media(max-width:768px){
+      .gen-layout{ gap:1rem; }
+      h2{ font-size:1.8rem; }
+      #output-panel .plan-exercise-row{ grid-template-columns:1fr; gap:.25rem; }
+      .tips-grid{ grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">FORGE<span>FIT</span></a>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="workouts.html">Workouts</a>
+    <a href="ai-coach.html">AI Coach</a>
+  </div>
+  <button class="btn btn-ghost btn-sm" onclick="GymApp.auth.logout()">Log Out</button>
+</nav>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="dashboard.html" class="sidebar-item"><span class="icon">📊</span>Dashboard</a>
+      <a href="workouts.html" class="sidebar-item"><span class="icon">🏋️</span>My Workouts</a>
+      <a href="ai-coach.html" class="sidebar-item"><span class="icon">🤖</span>AI Coach</a>
+      <a href="generator.html" class="sidebar-item active"><span class="icon">⚡</span>Generate Plan</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="profile.html" class="sidebar-item"><span class="icon">👤</span>Profile</a>
+      <button class="sidebar-item" onclick="GymApp.auth.logout()"><span class="icon">🚪</span>Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <h2 style="font-size:2.5rem;margin-bottom:.25rem;">⚡ Generate AI Plan</h2>
+    <p class="text-muted" style="margin-bottom:2rem;">Configure your preferences and let the AI build a personalised program.</p>
+
+    <div class="gen-layout">
+
+      <!-- Config -->
+      <div>
+        <div class="card" style="padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem;">
+
+          <div class="form-group">
+            <label class="form-label">Fitness Level</label>
+            <select class="form-select" id="gen-level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate" selected>Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Training Goals</label>
+            <div class="chip-select" id="goal-chips">
+              <div class="chip selected" data-value="muscle_gain">💪 Muscle Gain</div>
+              <div class="chip" data-value="weight_loss">🔥 Weight Loss</div>
+              <div class="chip" data-value="endurance">🏃 Endurance</div>
+              <div class="chip" data-value="flexibility">🧘 Flexibility</div>
+              <div class="chip" data-value="general_fitness">⚡ General Fitness</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Focus Area</label>
+            <div class="chip-select" id="focus-chips">
+              <div class="chip selected" data-value="full body">Full Body</div>
+              <div class="chip" data-value="upper body">Upper Body</div>
+              <div class="chip" data-value="lower body">Lower Body</div>
+              <div class="chip" data-value="push pull legs">PPL Split</div>
+              <div class="chip" data-value="core">Core</div>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Days / Week</label>
+              <select class="form-select" id="gen-days">
+                <option value="2">2 days</option>
+                <option value="3" selected>3 days</option>
+                <option value="4">4 days</option>
+                <option value="5">5 days</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Session Length</label>
+              <select class="form-select" id="gen-duration">
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60" selected>60 min</option>
+                <option value="90">90 min</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Equipment</label>
+            <div class="chip-select" id="equip-chips">
+              <div class="chip selected" data-value="bodyweight">Bodyweight</div>
+              <div class="chip selected" data-value="dumbbells">Dumbbells</div>
+              <div class="chip selected" data-value="machines">Machines</div>
+              <div class="chip" data-value="resistance_bands">Bands</div>
+              <div class="chip" data-value="kettlebells">Kettlebells</div>
+              <div class="chip" data-value="pull_up_bar">Pull-Up Bar</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-block btn-lg" id="gen-btn">
+            <span id="gen-btn-text">⚡ Generate My Plan</span>
+            <span id="gen-btn-loader" style="display:none;"><span class="loader" style="width:16px;height:16px;border-width:2px;"></span>&nbsp; Building your plan...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div id="output-panel">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;color:var(--text-muted);gap:1rem;text-align:center;">
+          <div style="font-size:4rem;">⚡</div>
+          <div>
+            <div style="font-weight:600;color:var(--text-primary);margin-bottom:.25rem;">Your plan will appear here</div>
+            <p style="font-size:.875rem;max-width:30ch;">Configure your preferences on the left and click Generate.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+<script src="api.js"></script>
+<script src="mobile.js"></script>
+<script>
+  if (!GymApp.requireAuth()) { throw new Error('auth'); }
+
+  const user = GymApp.auth.currentUser();
+  if (user && user.fitnessLevel) document.getElementById('gen-level').value = user.fitnessLevel;
+
+  // Multi-select chips
+  document.getElementById('goal-chips').addEventListener('click', function(e) {
+    const chip = e.target.closest('.chip');
+    if (chip) chip.classList.toggle('selected');
+  });
+  document.getElementById('equip-chips').addEventListener('click', function(e) {
+    const chip = e.target.closest('.chip');
+    if (chip) chip.classList.toggle('selected');
+  });
+  // Single-select for focus
+  document.getElementById('focus-chips').addEventListener('click', function(e) {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('#focus-chips .chip').forEach(function(c){ c.classList.remove('selected'); });
+    chip.classList.add('selected');
+  });
+
+  function getSelected(id) {
+    return Array.from(document.querySelectorAll('#' + id + ' .chip.selected')).map(function(c){ return c.dataset.value; });
+  }
+
+  document.getElementById('gen-btn').addEventListener('click', generatePlan);
+
+  async function generatePlan() {
+    const goals     = getSelected('goal-chips');
+    const equipment = getSelected('equip-chips');
+    const focusArr  = getSelected('focus-chips');
+
+    if (!goals.length)     { GymApp.showToast('Please select at least one goal', 'error'); return; }
+    if (!equipment.length) { GymApp.showToast('Please select at least one equipment option', 'error'); return; }
+
+    const payload = {
+      goals,
+      fitnessLevel:  document.getElementById('gen-level').value,
+      daysPerWeek:   parseInt(document.getElementById('gen-days').value),
+      sessionLength: parseInt(document.getElementById('gen-duration').value),
+      equipment,
+      focusArea: focusArr[0] || 'full body',
+    };
+
+    setLoading(true);
+
+    const steps = ['Analysing your profile…', 'Selecting exercises…', 'Building your programme…', 'Almost done…'];
+    let si = 0;
+    const panel = document.getElementById('output-panel');
+    panel.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:1.5rem;text-align:center;"><div class="gen-spinner"></div><h3>Building Your Plan</h3><div class="text-muted" id="gen-step">' + steps[0] + '</div></div>';
+    const iv = setInterval(function(){ si=(si+1)%steps.length; const el=document.getElementById('gen-step'); if(el) el.textContent=steps[si]; }, 2200);
+
+    try {
+      const plan = await GymApp.ai.generateWorkout(payload);
+      clearInterval(iv);
+      renderPlan(plan);
+    } catch (err) {
+      clearInterval(iv);
+      const msg = err.message || 'Generation failed. Check your .env AI settings.';
+      panel.innerHTML = '<div class="alert alert-error" style="margin:1rem 0;">❌ ' + msg + '</div><p class="text-muted" style="font-size:.85rem;padding:0 .5rem;">Check your server terminal for the full error. Common fixes: verify AI_API_KEY, AI_API_BASE_URL and AI_MODEL in your .env then restart the server.</p>';
+      GymApp.showToast(msg, 'error', 7000);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById('gen-btn');
+    document.getElementById('gen-btn-text').style.display   = on ? 'none' : '';
+    document.getElementById('gen-btn-loader').style.display = on ? '' : 'none';
+    btn.disabled = on;
+  }
+
+  function renderPlan(plan) {
+    const panel = document.getElementById('output-panel');
+    const catBadge = { strength:'💪 Strength', cardio:'🏃 Cardio', hiit:'⚡ HIIT', flexibility:'🧘 Flexibility', rest:'😴 Rest', custom:'🏋️ Custom' };
+
+    const daysHtml = (plan.days || []).map(function(day) {
+      const isRest = day.category === 'rest' || !day.exercises || !day.exercises.length;
+      const exRows = isRest ? '<div class="rest-day">😴 Rest day — light stretching or complete rest.</div>'
+        : day.exercises.map(function(ex) {
+          return '<div class="plan-exercise-row"><div class="plan-exercise-name">' + ex.name + '</div><div class="plan-exercise-meta">' + ex.sets + ' × ' + ex.reps + '</div><div class="plan-exercise-meta">' + ex.rest + 's rest</div></div>';
+        }).join('');
+      return '<div class="plan-day"><div class="plan-day-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'\':\\\'none\'"><div><div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.2rem;">' + day.day + '</div><div class="plan-day-title">' + day.title + '</div></div><span class="badge badge-accent">' + (catBadge[day.category]||day.category) + '</span></div><div class="plan-day-body">' + exRows + '</div></div>';
+    }).join('');
+
+    const tipsHtml = (plan.weeklyTips||[]).length
+      ? '<div style="margin-top:1.5rem;"><div style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:.75rem;letter-spacing:.04em;">WEEKLY TIPS</div><div class="tips-grid">' + plan.weeklyTips.map(function(t){ return '<div class="tip-card">💡 '+t+'</div>'; }).join('') + '</div></div>'
+      : '';
+
+    panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;"><div><h3 style="font-size:1.8rem;margin-bottom:.2rem;">' + (plan.title||'Your AI Plan') + '</h3><p style="font-size:.875rem;color:var(--text-secondary);">' + (plan.description||'') + '</p></div><div style="display:flex;gap:.6rem;"><button class="btn btn-outline btn-sm" onclick="savePlan()">💾 Save Plan</button><button class="btn btn-ghost btn-sm" onclick="generatePlan()">↻ Regenerate</button></div></div>' + daysHtml + tipsHtml;
+
+    panel.dataset.plan = JSON.stringify(plan);
+  }
+
+  async function savePlan() {
+    const panel = document.getElementById('output-panel');
+    let plan;
+    try { plan = JSON.parse(panel.dataset.plan || '{}'); } catch { GymApp.showToast('No plan to save', 'error'); return; }
+    if (!plan.days) { GymApp.showToast('No plan to save', 'error'); return; }
+    try {
+      const toSave = plan.days.filter(function(d){ return d.category !== 'rest' && d.exercises && d.exercises.length; });
+      await Promise.all(toSave.map(function(day) {
+        var validCats = ['strength','cardio','hiit','flexibility','endurance','sports','custom']; var cat = (day.category||'').toLowerCase(); var safeCat = validCats.indexOf(cat) !== -1 ? cat : 'custom'; return GymApp.workouts.create({ title: (plan.title||'AI Plan') + ' — ' + day.day, description: day.title, category: safeCat, exercises: day.exercises, isAiGenerated: true });
+      }));
+      GymApp.showToast('Plan saved! ' + toSave.length + ' workouts added.', 'success');
+      setTimeout(function(){ window.location.href = '/workouts.html'; }, 1200);
+    } catch (err) {
+      GymApp.showToast(err.message || 'Save failed', 'error');
+    }
+  }
+</script>
+</body>
+</html>

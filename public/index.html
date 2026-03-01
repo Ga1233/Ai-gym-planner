@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORGEFIT — AI-Powered Gym Planner</title>
+  <meta name="description" content="Build smarter workouts with AI. Personalized training plans, real-time coaching, and progress tracking.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Landing-only styles */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
+    .how-num {
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: var(--accent-glow);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      -webkit-text-stroke: 2px var(--accent);
+      color: transparent;
+    }
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .quote { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; font-style: italic; margin-bottom: 1.25rem; }
+    .reviewer { display: flex; align-items: center; gap: 0.75rem; }
+    .reviewer-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--accent-glow);
+      border: 2px solid rgba(200,241,53,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--accent); font-size: 0.875rem;
+    }
+    .reviewer-name { font-weight: 600; font-size: 0.9rem; }
+    .reviewer-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .section-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .section-label::after { content: ''; flex: 0 0 40px; height: 1px; background: var(--accent); }
+    .cta-section {
+      text-align: center;
+      padding: 8rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(200,241,53,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 0;
+    }
+    .footer-logo { font-family: var(--font-display); font-size: 2rem; color: var(--text-primary); }
+    .footer-logo span { color: var(--accent); }
+    .footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-muted); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text-primary); }
+    .footer-bottom { border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; }
+    .hero-mockup {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      font-size: 0.85rem;
+    }
+    .mockup-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-exercise {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-raised);
+      border-radius: var(--radius);
+      margin-bottom: 0.4rem;
+    }
+    .mockup-exercise-name { font-weight: 600; font-size: 0.82rem; }
+    .mockup-exercise-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .mockup-ai-chip {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--accent-glow);
+      border: 1px solid rgba(200,241,53,0.25);
+      border-radius: 99px; padding: 0.25rem 0.75rem;
+      font-size: 0.72rem; font-weight: 600; color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    /* Mobile landing */
+  @media(max-width:900px){
+    .hero-inner{ grid-template-columns:1fr !important; gap:2rem !important; }
+    .footer-bottom{ flex-direction:column; gap:.5rem; text-align:center; }
+    .footer-links{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="nav">
+  <a href="/" class="nav-logo">FORGE<span>FIT</span></a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#testimonials">Reviews</a>
+  </div>
+  <div style="display:flex; gap:0.75rem; align-items:center;">
+    <a href="login.html" class="btn btn-ghost btn-sm">Log In</a>
+    <a href="register.html" class="btn btn-primary btn-sm">Get Started</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center;" class="hero-inner">
+      <div class="animate-in">
+        <div class="hero-eyebrow">AI-Powered Training Platform</div>
+        <h1 class="hero-title display">
+          BUILD YOUR<br><strong>STRONGEST</strong><br>SELF
+        </h1>
+        <p class="hero-subtitle">
+          Personalized workout plans generated by AI, adapted to your goals, equipment, and schedule. Train smarter, not harder.
+        </p>
+        <div class="hero-cta">
+          <a href="register.html" class="btn btn-primary btn-lg">Start Free Today</a>
+          <a href="#how" class="btn btn-ghost btn-lg">See How It Works</a>
+        </div>
+      </div>
+      <div class="animate-in delay-2">
+        <div class="hero-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dot" style="background:#ff5f56"></div>
+            <div class="mockup-dot" style="background:#ffbd2e"></div>
+            <div class="mockup-dot" style="background:#27c93f"></div>
+            <span style="color:var(--text-muted); font-size:0.75rem; margin-left:auto;">Today's Workout</span>
+          </div>
+          <div class="mockup-ai-chip">
+            <div class="ai-dot"></div>
+            AI Generated · Upper Body Strength
+          </div>
+          <div class="mockup-exercise">
+            <span class="mockup-exercise-name">Bench Press</span>
+            <span class="mockup-exercise-meta">4 × 8–10 · 90s rest</span>
+          </div>
+          <div class="mockup-exercise">
+            <span class="mockup-exercise-name">Incline DB Press</span>
+            <span class="mockup-exercise-meta">3 × 10–12 · 75s rest</span>
+          </div>
+          <div class="mockup-exercise">
+            <span class="mockup-exercise-name">Cable Fly</span>
+            <span class="mockup-exercise-meta">3 × 15 · 60s rest</span>
+          </div>
+          <div class="mockup-exercise">
+            <span class="mockup-exercise-name">Tricep Dip</span>
+            <span class="mockup-exercise-meta">3 × AMRAP · 60s rest</span>
+          </div>
+          <div class="mockup-exercise">
+            <span class="mockup-exercise-name">Face Pull</span>
+            <span class="mockup-exercise-meta">4 × 15 · 45s rest</span>
+          </div>
+          <div class="hero-stat-row" style="margin: 1rem -1.25rem -1.25rem; border-radius: 0 0 10px 10px;">
+            <div class="hero-stat-cell">
+              <div class="hero-stat-num">65</div>
+              <div class="hero-stat-label">Minutes</div>
+            </div>
+            <div class="hero-stat-cell">
+              <div class="hero-stat-num">5</div>
+              <div class="hero-stat-label">Exercises</div>
+            </div>
+            <div class="hero-stat-cell">
+              <div class="hero-stat-num" style="color:var(--accent)">⭑⭑⭑⭑</div>
+              <div class="hero-stat-label">Difficulty</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section id="features" class="section" style="background: var(--bg-deep);">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2 style="margin-bottom:0.5rem;">Everything you need<br>to <span class="text-accent">train smarter</span></h2>
+    <p class="text-muted" style="margin-bottom:3rem; max-width:52ch;">A complete platform built for athletes at every level. No fluff — just tools that work.</p>
+    <div class="features-grid">
+      <div class="card card-hover animate-in">
+        <div class="feature-icon">🤖</div>
+        <h4>AI Workout Generator</h4>
+        <p class="text-muted mt-sm" style="font-size:0.9rem; max-width:none;">Describe your goals and constraints. Get a complete, progressive training plan in seconds.</p>
+      </div>
+      <div class="card card-hover animate-in delay-1">
+        <div class="feature-icon">💬</div>
+        <h4>AI Coach Chat</h4>
+        <p class="text-muted mt-sm" style="font-size:0.9rem; max-width:none;">Ask anything — form tips, nutrition advice, recovery strategies. Your personal coach is always on.</p>
+      </div>
+      <div class="card card-hover animate-in delay-2">
+        <div class="feature-icon">📊</div>
+        <h4>Progress Tracking</h4>
+        <p class="text-muted mt-sm" style="font-size:0.9rem; max-width:none;">Log every session, track PRs, visualize trends. See exactly how far you've come.</p>
+      </div>
+      <div class="card card-hover animate-in delay-3">
+        <div class="feature-icon">🏋️</div>
+        <h4>Exercise Library</h4>
+        <p class="text-muted mt-sm" style="font-size:0.9rem; max-width:none;">Hundreds of exercises with descriptions, muscle targets, and modifications for any equipment level.</p>
+      </div>
+      <div class="card card-hover animate-in">
+        <div class="feature-icon">📅</div>
+        <h4>Smart Scheduling</h4>
+        <p class="text-muted mt-sm" style="font-size:0.9rem; max-width:none;">Plan your week with a calendar view. The AI respects your available days and recovery needs.</p>
+      </div>
+      <div class="card card-hover animate-in delay-1">
+        <div class="feature-icon">🔬</div>
+        <h4>Workout Analysis</h4>
+        <p class="text-muted mt-sm" style="font-size:0.9rem; max-width:none;">Submit any workout and get instant AI feedback on balance, volume, intensity, and safety.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section id="how" class="section">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2 style="margin-bottom:3rem;">Three steps to your<br><span class="text-accent">ideal training plan</span></h2>
+    <div class="how-grid">
+      <div>
+        <div class="how-num">01</div>
+        <h3>Set Your Profile</h3>
+        <p class="text-muted mt-sm" style="font-size:0.9rem;">Tell us your fitness level, goals, available equipment, and how many days per week you can train.</p>
+      </div>
+      <div>
+        <div class="how-num">02</div>
+        <h3>Generate With AI</h3>
+        <p class="text-muted mt-sm" style="font-size:0.9rem;">Our AI builds a custom, periodized program tailored specifically to you — not a cookie-cutter template.</p>
+      </div>
+      <div>
+        <div class="how-num">03</div>
+        <h3>Train & Adapt</h3>
+        <p class="text-muted mt-sm" style="font-size:0.9rem;">Log your sessions, chat with the AI coach, and refine your plan as you get stronger.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ── -->
+<section id="testimonials" class="section" style="background: var(--bg-deep);">
+  <div class="container">
+    <div class="section-label">Reviews</div>
+    <h2 style="margin-bottom:3rem;">Real people,<br><span class="text-accent">real results</span></h2>
+    <div class="testimonial-grid">
+      <div class="card">
+        <div class="quote">"I've tried every fitness app out there. ForgeFit is the first one that actually felt like it understood MY situation. The AI plans are genuinely smart."</div>
+        <div class="reviewer">
+          <div class="reviewer-avatar">MK</div>
+          <div>
+            <div class="reviewer-name">Marcus K.</div>
+            <div class="reviewer-meta">Intermediate lifter · 8 months on platform</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="quote">"As a busy mum with limited equipment, I needed something flexible. The AI understood that and gave me a killer home workout plan that I actually stick to."</div>
+        <div class="reviewer">
+          <div class="reviewer-avatar">SL</div>
+          <div>
+            <div class="reviewer-name">Sarah L.</div>
+            <div class="reviewer-meta">Beginner · 5 months on platform</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="quote">"The workout analysis feature is a hidden gem. It caught volume imbalances in my program I never noticed. My shoulder pain disappeared in two weeks."</div>
+        <div class="reviewer">
+          <div class="reviewer-avatar">DJ</div>
+          <div>
+            <div class="reviewer-name">Derek J.</div>
+            <div class="reviewer-meta">Advanced lifter · 14 months on platform</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="container">
+    <div class="section-label" style="justify-content:center;">Get Started</div>
+    <h2 style="margin-bottom:1rem;">Ready to forge your<br><span class="text-accent">best physique?</span></h2>
+    <p class="text-muted" style="margin: 0 auto 2.5rem; text-align:center;">Join thousands of athletes already training smarter with AI.</p>
+    <a href="register.html" class="btn btn-primary btn-lg">Create Free Account</a>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <div class="container">
+    <div class="flex-between flex-wrap gap-md" style="margin-bottom:2rem;">
+      <div>
+        <div class="footer-logo">FORGE<span>FIT</span></div>
+        <p class="text-muted mt-sm" style="font-size:0.85rem; max-width:36ch;">AI-powered training for athletes at every level.</p>
+      </div>
+      <div class="footer-links">
+        <!-- <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Support</a>
+        <a href="#">API Docs</a> -->
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <small>© 2026 ForgeFit. All rights reserved.</small>
+      <small class="text-muted">Built with ❤️ and AI</small>
+    </div>
+  </div>
+</footer>
+
+<script src="api.js"></script>
+<script>
+  // Redirect if already logged in
+  GymApp.redirectIfAuth();
+
+  // Intersection observer for scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.animation = 'fadeUp 0.5s var(--ease-out) both';
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.card, .how-grid > div').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
+<script>
+// Landing page mobile menu
+(function(){
+  var mq = window.matchMedia('(max-width:768px)');
+  var hbtn = document.getElementById('landing-hamburger');
+  var menu = document.getElementById('landing-mobile-menu');
+  var cta  = document.getElementById('nav-cta');
+  var links = document.querySelector('#landing-nav .nav-links');
+
+  function applyMobile(isMobile){
+    if(hbtn) hbtn.style.display = isMobile ? 'flex' : 'none';
+    if(cta)  cta.style.display  = isMobile ? 'none' : 'flex';
+    if(links) links.style.display = isMobile ? 'none' : 'flex';
+  }
+  applyMobile(mq.matches);
+  mq.addEventListener('change', function(e){ applyMobile(e.matches); });
+
+  if(hbtn) hbtn.addEventListener('click', function(){
+    var open = menu.style.display === 'flex';
+    menu.style.display = open ? 'none' : 'flex';
+    hbtn.classList.toggle('open', !open);
+  });
+})();
+
+function closeLandingMenu(){
+  var menu = document.getElementById('landing-mobile-menu');
+  var hbtn = document.getElementById('landing-hamburger');
+  if(menu) menu.style.display = 'none';
+  if(hbtn) hbtn.classList.remove('open');
+}
+</script>

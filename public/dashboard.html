@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — ForgeFit</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.4rem; }
+    .day-cell {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      min-height: 80px;
+      display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+    }
+    .day-cell:hover { border-color: var(--border-bright); }
+    .day-cell.has-workout { border-color: rgba(200,241,53,0.3); background: var(--accent-glow2); }
+    .day-cell.today { border-color: var(--accent); }
+    .day-cell.completed { background: rgba(200,241,53,0.08); }
+    .day-name { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .day-date { font-family: var(--font-display); font-size: 1.3rem; color: var(--text-primary); line-height: 1; }
+    .day-cell.today .day-date { color: var(--accent); }
+    .day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: auto; }
+    .recent-workout-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .recent-workout-item:last-child { border-bottom: none; }
+    .workout-type-icon {
+      width: 40px; height: 40px; border-radius: var(--radius);
+      background: var(--bg-raised);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .quick-action {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.5rem; padding: 1.25rem;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      cursor: pointer; text-align: center;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      text-decoration: none; color: var(--text-primary);
+    }
+    .quick-action:hover { border-color: var(--accent); background: var(--accent-glow2); transform: translateY(-2px); }
+    .quick-action-icon { font-size: 1.5rem; }
+    .quick-action-label { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; color: var(--text-secondary); }
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--bg-surface) 60%, rgba(200,241,53,0.06));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .page-section { margin-bottom: 2.5rem; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .section-title { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.04em; }
+    .responsive-two-col { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; }
+  @media(max-width:768px){ .responsive-two-col { grid-template-columns: 1fr !important; } }
+</style>
+</head>
+<body>
+
+<!-- ── Top Nav ── -->
+<nav class="nav">
+  <a href="/" class="nav-logo">FORGE<span>FIT</span></a>
+  <div class="nav-links">
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="workouts.html">Workouts</a>
+    <a href="ai-coach.html">AI Coach</a>
+    <a href="profile.html">Profile</a>
+  </div>
+  <div style="display:flex; gap:0.75rem; align-items:center;">
+    <div id="user-name-nav" style="font-size:0.85rem; font-weight:600; color:var(--text-secondary);"></div>
+    <button class="btn btn-ghost btn-sm" onclick="GymApp.auth.logout()">Log Out</button>
+  </div>
+</nav>
+
+<!-- ── App Layout ── -->
+<div class="app-layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="dashboard.html" class="sidebar-item active">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="workouts.html" class="sidebar-item">
+        <span class="icon">🏋️</span> My Workouts
+      </a>
+      <a href="ai-coach.html" class="sidebar-item">
+        <span class="icon">🤖</span> AI Coach
+      </a>
+      <a href="generator.html" class="sidebar-item">
+        <span class="icon">⚡</span> Generate Plan
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="profile.html" class="sidebar-item">
+        <span class="icon">👤</span> Profile
+      </a>
+      <button class="sidebar-item" onclick="GymApp.auth.logout()" style="color:var(--text-muted);">
+        <span class="icon">🚪</span> Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ── -->
+  <main class="main-content">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner animate-in">
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--accent); margin-bottom:0.4rem;">Welcome Back</div>
+        <h2 id="welcome-name" style="font-size:2.5rem; margin-bottom:0.25rem;">Loading...</h2>
+        <p class="text-muted" style="font-size:0.9rem;">Here's your training overview for this week.</p>
+      </div>
+      <a href="generator.html" class="btn btn-primary">⚡ Generate New Plan</a>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="grid-4 animate-in delay-1" style="margin-bottom:2.5rem;">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-label">Total Workouts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-week">—</div>
+        <div class="stat-label">This Week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-streak">—</div>
+        <div class="stat-label">Current Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-ai">—</div>
+        <div class="stat-label">AI Plans Used</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="page-section animate-in delay-2">
+      <div class="section-header">
+        <div class="section-title">Quick Actions</div>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:0.75rem;">
+        <a href="generator.html" class="quick-action">
+          <span class="quick-action-icon">🤖</span>
+          <span class="quick-action-label">Generate AI Plan</span>
+        </a>
+        <a href="workouts.html?new=1" class="quick-action">
+          <span class="quick-action-icon">➕</span>
+          <span class="quick-action-label">Log Workout</span>
+        </a>
+        <a href="ai-coach.html" class="quick-action">
+          <span class="quick-action-icon">💬</span>
+          <span class="quick-action-label">Ask AI Coach</span>
+        </a>
+        <a href="workouts.html" class="quick-action">
+          <span class="quick-action-icon">📋</span>
+          <span class="quick-action-label">View All Plans</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- This Week Calendar -->
+    <div class="page-section animate-in delay-3">
+      <div class="section-header">
+        <div class="section-title">This Week</div>
+        <a href="workouts.html" class="btn btn-ghost btn-sm">View All →</a>
+      </div>
+      <div class="card">
+        <div class="week-grid" id="week-grid">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Two Column: Recent + AI Tip -->
+    <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:1.5rem;" class="animate-in delay-4 responsive-two-col">
+
+      <!-- Recent Workouts -->
+      <div class="page-section">
+        <div class="section-header">
+          <div class="section-title">Recent Workouts</div>
+          <a href="workouts.html" class="btn btn-ghost btn-sm">See All →</a>
+        </div>
+        <div class="card">
+          <div id="recent-workouts">
+            <div class="skeleton" style="height:56px; margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:56px; margin-bottom:0.5rem;"></div>
+            <div class="skeleton" style="height:56px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Daily Tip -->
+      <div class="page-section">
+        <div class="section-header">
+          <div class="section-title">AI Coach Tip</div>
+          <button class="btn btn-ghost btn-sm" id="refresh-tip">↻</button>
+        </div>
+        <div class="card card-accent" id="ai-tip-card">
+          <div style="font-size:0.72rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--accent); margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+            <span style="width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block;"></span>
+            Daily Insight
+          </div>
+          <div id="ai-tip-text" class="skeleton" style="height:100px;"></div>
+          <div style="margin-top:1rem;">
+            <a href="ai-coach.html" class="btn btn-outline btn-sm btn-block">Chat with AI Coach →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- ── AI Plan Generate Modal (simplified inline) ── -->
+<div id="toast-container"></div>
+
+<script src="api.js"></script>
+<script src="mobile.js"></script>
+<script>
+  // Guard
+  if (!GymApp.requireAuth()) throw new Error('Not authenticated');
+
+  const user = GymApp.auth.currentUser();
+
+  // Fill user name
+  if (user) {
+    document.getElementById('welcome-name').textContent = user.name?.split(' ')[0] || 'Athlete';
+    document.getElementById('user-name-nav').textContent = user.name || '';
+  }
+
+  // Build week grid
+  (function buildWeekGrid() {
+    const grid = document.getElementById('week-grid');
+    const days  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date();
+    const start = new Date(today);
+    start.setDate(today.getDate() - today.getDay()); // Sunday
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const isToday = d.toDateString() === today.toDateString();
+      const cell = document.createElement('div');
+      cell.className = `day-cell${isToday ? ' today' : ''}`;
+      cell.innerHTML = `
+        <div class="day-name">${days[i]}</div>
+        <div class="day-date">${d.getDate()}</div>
+      `;
+      grid.appendChild(cell);
+    }
+  })();
+
+  // Load workouts and populate dashboard
+  async function loadDashboard() {
+    try {
+      const { workouts, total } = await GymApp.workouts.list({ limit: 5 });
+
+      // Stats
+      document.getElementById('stat-total').textContent = total || 0;
+      const thisWeek = workouts.filter(w => {
+        const d = new Date(w.createdAt);
+        const now = new Date();
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+        return d >= startOfWeek;
+      }).length;
+      document.getElementById('stat-week').textContent = thisWeek;
+      document.getElementById('stat-streak').textContent = Math.min(thisWeek * 2, 14) + (thisWeek > 0 ? ' days' : '');
+      document.getElementById('stat-ai').textContent = workouts.filter(w => w.isAiGenerated).length;
+
+      // Mark week cells that have workouts
+      workouts.forEach(w => {
+        if (!w.scheduledFor && !w.createdAt) return;
+        const d = new Date(w.scheduledFor || w.createdAt);
+        const dayIdx = d.getDay();
+        const cells = document.querySelectorAll('.day-cell');
+        const today = new Date();
+        const start = new Date(today);
+        start.setDate(today.getDate() - today.getDay());
+        const cellDate = new Date(start);
+        cellDate.setDate(start.getDate() + dayIdx);
+        if (cellDate.toDateString() === d.toDateString()) {
+          const cell = cells[dayIdx];
+          if (cell) {
+            cell.classList.add('has-workout');
+            if (!cell.querySelector('.day-dot')) {
+              const dot = document.createElement('div');
+              dot.className = 'day-dot';
+              cell.appendChild(dot);
+            }
+          }
+        }
+      });
+
+      // Recent workouts list
+      const categoryIcons = { strength:'💪', cardio:'🏃', hiit:'⚡', flexibility:'🧘', sports:'⚽', custom:'🏋️' };
+      const recentEl = document.getElementById('recent-workouts');
+      if (workouts.length === 0) {
+        recentEl.innerHTML = `
+          <div style="text-align:center; padding:2rem 0; color:var(--text-muted);">
+            <div style="font-size:2rem; margin-bottom:0.5rem;">🏋️</div>
+            <div style="font-weight:600; margin-bottom:0.25rem;">No workouts yet</div>
+            <a href="generator.html" class="btn btn-primary btn-sm" style="margin-top:0.75rem;">Generate your first plan →</a>
+          </div>`;
+      } else {
+        recentEl.innerHTML = workouts.map(w => `
+          <div class="recent-workout-item">
+            <div class="workout-type-icon">${categoryIcons[w.category] || '🏋️'}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-weight:600; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${w.title}</div>
+              <div style="font-size:0.78rem; color:var(--text-muted);">${GymApp.capitalize(w.category)} · ${w.exercises?.length || 0} exercises · ${GymApp.formatRelative(w.createdAt)}</div>
+            </div>
+            ${w.isAiGenerated ? '<span class="badge badge-accent">AI</span>' : ''}
+          </div>`).join('');
+      }
+    } catch (err) {
+      console.error('Dashboard load error:', err);
+    }
+  }
+
+  // Load AI tip
+  async function loadAiTip() {
+    const tipEl = document.getElementById('ai-tip-text');
+    tipEl.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+    try {
+      const u = GymApp.auth.currentUser();
+      const tips = [
+        'Progressive overload is the cornerstone of strength gains. Aim to increase weight, reps, or sets each week.',
+        'Compound movements like squats, deadlifts, and bench press give you the most return on your training time.',
+        'Sleep is when muscle is built. Prioritize 7–9 hours of quality sleep for optimal recovery.',
+        'Protein timing matters less than total daily intake. Aim for 0.7–1g per pound of bodyweight.',
+        'Deload weeks every 4–8 weeks prevent overtraining and supercharge your gains when you return to full volume.',
+        'Mind-muscle connection improves exercise effectiveness. Focus on feeling the target muscle working.',
+      ];
+      // Use a random tip (in production this would call /api/ai/chat)
+      await new Promise(r => setTimeout(r, 800)); // simulate API call
+      const tip = tips[Math.floor(Math.random() * tips.length)];
+      tipEl.textContent = tip;
+      tipEl.style.color = 'var(--text-secondary)';
+      tipEl.style.fontSize = '0.9rem';
+      tipEl.style.lineHeight = '1.65';
+    } catch (err) {
+      tipEl.textContent = 'Unable to load tip. Chat with the AI Coach for personalized advice.';
+      tipEl.style.color = 'var(--text-muted)';
+    }
+  }
+
+  document.getElementById('refresh-tip').addEventListener('click', loadAiTip);
+
+  loadDashboard();
+  loadAiTip();
+</script>
+</body>
+</html>

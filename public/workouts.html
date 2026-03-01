@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Workouts — ForgeFit</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .workout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+    .workout-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.15s;
+      position: relative;
+    }
+    .workout-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .workout-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.75rem; }
+    .workout-card-title { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: 0.03em; line-height: 1.2; }
+    .workout-card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+    .workout-card-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .filter-bar { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-btn {
+      padding: 0.4rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 99px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow2); }
+    .empty-state { text-align: center; padding: 5rem 2rem; color: var(--text-muted); }
+    .empty-state .big-icon { font-size: 4rem; margin-bottom: 1rem; }
+    @media(max-width:768px){
+    .filter-bar{ gap:.4rem; }
+    .filter-bar .form-input{ width:100%; margin-left:0; margin-top:.5rem; }
+    .filter-btn{ font-size:.72rem; padding:.3rem .65rem; }
+    .workout-card-header{ gap:.5rem; }
+    .workout-card-title{ font-size:1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-logo">FORGE<span>FIT</span></a>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="workouts.html" class="active">Workouts</a>
+    <a href="ai-coach.html">AI Coach</a>
+    <a href="profile.html">Profile</a>
+  </div>
+  <button class="btn btn-ghost btn-sm" onclick="GymApp.auth.logout()">Log Out</button>
+</nav>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Main</div>
+      <a href="dashboard.html" class="sidebar-item"><span class="icon">📊</span>Dashboard</a>
+      <a href="workouts.html" class="sidebar-item active"><span class="icon">🏋️</span>My Workouts</a>
+      <a href="ai-coach.html" class="sidebar-item"><span class="icon">🤖</span>AI Coach</a>
+      <a href="generator.html" class="sidebar-item"><span class="icon">⚡</span>Generate Plan</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Account</div>
+      <a href="profile.html" class="sidebar-item"><span class="icon">👤</span>Profile</a>
+      <button class="sidebar-item" onclick="GymApp.auth.logout()"><span class="icon">🚪</span>Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h2 style="font-size:2.5rem; margin-bottom:0.2rem;">My Workouts</h2>
+        <p class="text-muted" style="font-size:0.875rem;">All your saved training sessions and AI-generated plans</p>
+      </div>
+      <div style="display:flex; gap:0.75rem;">
+        <a href="generator.html" class="btn btn-primary">⚡ Generate AI Plan</a>
+        <button class="btn btn-outline" onclick="openNewModal()">➕ Log Workout</button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="strength">💪 Strength</button>
+      <button class="filter-btn" data-filter="cardio">🏃 Cardio</button>
+      <button class="filter-btn" data-filter="hiit">⚡ HIIT</button>
+      <button class="filter-btn" data-filter="flexibility">🧘 Flexibility</button>
+      <input type="search" class="form-input" id="search-input" placeholder="Search workouts..." style="max-width:240px; padding:0.4rem 0.875rem; margin-left:auto;">
+    </div>
+
+    <!-- Grid -->
+    <div class="workout-grid" id="workout-grid">
+      <!-- Skeletons while loading -->
+      <div class="skeleton" style="height:160px; border-radius:12px;"></div>
+      <div class="skeleton" style="height:160px; border-radius:12px;"></div>
+      <div class="skeleton" style="height:160px; border-radius:12px;"></div>
+    </div>
+    <div id="empty-state" style="display:none;" class="empty-state">
+      <div class="big-icon">🏋️</div>
+      <h3 style="font-size:1.5rem; margin-bottom:0.5rem;">No workouts yet</h3>
+      <p style="margin-bottom:1.5rem;">Generate an AI plan or log your first session to get started.</p>
+      <a href="generator.html" class="btn btn-primary">⚡ Generate AI Plan</a>
+    </div>
+  </main>
+</div>
+
+<!-- ── New Workout Modal ── -->
+<div class="modal-overlay" id="new-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h4>Log New Workout</h4>
+      <button class="modal-close" onclick="closeNewModal()">×</button>
+    </div>
+    <form id="new-workout-form" style="display:flex; flex-direction:column; gap:1rem;">
+      <div class="form-group">
+        <label class="form-label">Workout Title</label>
+        <input class="form-input" id="nw-title" type="text" placeholder="e.g. Upper Body Push" required>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="nw-category">
+            <option value="strength">Strength</option>
+            <option value="cardio">Cardio</option>
+            <option value="hiit">HIIT</option>
+            <option value="flexibility">Flexibility</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration (min)</label>
+          <input class="form-input" id="nw-duration" type="number" min="5" max="300" placeholder="60">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="nw-notes" placeholder="How did it go?" style="min-height:80px;"></textarea>
+      </div>
+      <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+        <button type="button" class="btn btn-ghost" onclick="closeNewModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="nw-submit">Save Workout</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Workout Detail Modal ── -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h4 id="detail-title">Workout</h4>
+      <button class="modal-close" onclick="closeDetailModal()">×</button>
+    </div>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="api.js"></script>
+<script src="mobile.js"></script>
+<script>
+  if (!GymApp.requireAuth()) throw new Error('Not authenticated');
+
+  let allWorkouts = [];
+  let activeFilter = 'all';
+  const categoryIcons = { strength:'💪', cardio:'🏃', hiit:'⚡', flexibility:'🧘', sports:'⚽', custom:'🏋️' };
+
+  async function loadWorkouts() {
+    try {
+      const { workouts } = await GymApp.workouts.list({ limit: 50 });
+      allWorkouts = workouts;
+      renderWorkouts(workouts);
+    } catch (err) {
+      document.getElementById('workout-grid').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+  }
+
+  function renderWorkouts(list) {
+    const grid  = document.getElementById('workout-grid');
+    const empty = document.getElementById('empty-state');
+
+    if (!list.length) {
+      grid.innerHTML = '';
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+    grid.innerHTML = list.map(w => `
+      <div class="workout-card" onclick="openDetailModal('${w._id}')">
+        <div class="workout-card-header">
+          <div>
+            <div class="workout-card-title">${w.title}</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">${GymApp.formatRelative(w.createdAt)}</div>
+          </div>
+          <div style="font-size:1.4rem;">${categoryIcons[w.category] || '🏋️'}</div>
+        </div>
+        ${w.description ? `<p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:0.75rem;">${w.description}</p>` : ''}
+        <div class="workout-card-meta">
+          <span class="badge badge-muted">${GymApp.capitalize(w.category)}</span>
+          ${w.exercises?.length ? `<span class="badge badge-muted">${w.exercises.length} exercises</span>` : ''}
+          ${w.duration ? `<span class="badge badge-muted">⏱ ${w.duration}min</span>` : ''}
+          ${w.isAiGenerated ? '<span class="badge badge-accent">🤖 AI</span>' : ''}
+        </div>
+        <div class="workout-card-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-ghost btn-sm" onclick="deleteWorkout('${w._id}')">🗑 Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Filter
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      applyFilters();
+    });
+  });
+
+  document.getElementById('search-input').addEventListener('input', applyFilters);
+
+  function applyFilters() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    let filtered = allWorkouts;
+    if (activeFilter !== 'all') filtered = filtered.filter(w => w.category === activeFilter);
+    if (query) filtered = filtered.filter(w => w.title.toLowerCase().includes(query) || (w.description || '').toLowerCase().includes(query));
+    renderWorkouts(filtered);
+  }
+
+  // Detail modal
+  async function openDetailModal(id) {
+    const modal = document.getElementById('detail-modal');
+    modal.classList.add('open');
+    document.getElementById('detail-body').innerHTML = '<div class="skeleton" style="height:200px;"></div>';
+
+    try {
+      const w = await GymApp.workouts.get(id);
+      document.getElementById('detail-title').textContent = w.title;
+      const exerciseRows = (w.exercises || []).map(ex => `
+        <div style="display:grid; grid-template-columns:1fr auto auto; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid var(--border); font-size:0.875rem;">
+          <div style="font-weight:600;">${ex.name}</div>
+          <div style="color:var(--text-muted);">${ex.sets} × ${ex.reps}</div>
+          <div style="color:var(--text-muted);">${ex.rest}s</div>
+        </div>`).join('');
+
+      document.getElementById('detail-body').innerHTML = `
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+          <span class="badge badge-accent">${GymApp.capitalize(w.category)}</span>
+          ${w.isAiGenerated ? '<span class="badge badge-accent">🤖 AI Generated</span>' : ''}
+          ${w.duration ? `<span class="badge badge-muted">⏱ ${w.duration}min</span>` : ''}
+          <span class="badge badge-muted">📅 ${GymApp.formatDate(w.createdAt)}</span>
+        </div>
+        ${w.description ? `<p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.25rem;">${w.description}</p>` : ''}
+        ${w.exercises?.length ? `
+          <h4 style="font-size:1rem; margin-bottom:0.5rem;">Exercises (${w.exercises.length})</h4>
+          ${exerciseRows}` : '<p class="text-muted">No exercises logged.</p>'}
+        ${w.notes ? `<div style="margin-top:1rem; padding:0.875rem; background:var(--bg-surface); border-radius:var(--radius); font-size:0.875rem; color:var(--text-muted);">📝 ${w.notes}</div>` : ''}`;
+    } catch (err) {
+      document.getElementById('detail-body').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+    }
+  }
+
+  function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
+
+  // New workout modal
+  function openNewModal()  { document.getElementById('new-modal').classList.add('open'); }
+  function closeNewModal() { document.getElementById('new-modal').classList.remove('open'); }
+
+  document.getElementById('new-workout-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('nw-submit');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+      await GymApp.workouts.create({
+        title:    document.getElementById('nw-title').value.trim(),
+        category: document.getElementById('nw-category').value,
+        duration: Number(document.getElementById('nw-duration').value) || undefined,
+        notes:    document.getElementById('nw-notes').value.trim(),
+      });
+      GymApp.showToast('Workout saved!', 'success');
+      closeNewModal();
+      e.target.reset();
+      await loadWorkouts();
+    } catch (err) {
+      GymApp.showToast(err.message || 'Save failed', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Workout';
+    }
+  });
+
+  async function deleteWorkout(id) {
+    if (!confirm('Delete this workout?')) return;
+    try {
+      await GymApp.workouts.delete(id);
+      GymApp.showToast('Workout deleted', 'success');
+      allWorkouts = allWorkouts.filter(w => w._id !== id);
+      applyFilters();
+    } catch (err) {
+      GymApp.showToast(err.message || 'Delete failed', 'error');
+    }
+  }
+
+  // Close modals on overlay click
+  ['new-modal','detail-modal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', e => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+    });
+  });
+
+  loadWorkouts();
+</script>
+</body>
+</html>
