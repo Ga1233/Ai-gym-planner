@@ -6,13 +6,16 @@
   <title>AI Coach — ForgeFit</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* ── Make this page fill the full viewport without scroll ── */
-    html, body { height: 100%; overflow: hidden; }
+    /* ── Full viewport layout ── */
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
 
     .app-layout {
-      height: 100vh;
       display: grid;
       grid-template-columns: 240px 1fr;
+      height: 100vh;
       padding-top: 64px;
       overflow: hidden;
     }
@@ -22,18 +25,19 @@
       flex-direction: column;
       overflow: hidden;
       padding: 1.5rem 2rem 1rem;
+      min-height: 0;
     }
 
-    /* ── Header row ── */
+    /* ── Page header ── */
     .chat-page-header {
       display: flex;
       align-items: center;
       gap: .75rem;
-      margin-bottom: 1rem;
       flex-shrink: 0;
+      margin-bottom: .75rem;
     }
 
-    /* ── Chat card grows to fill space ── */
+    /* ── Chat card fills all remaining space ── */
     .chat-card {
       flex: 1;
       display: flex;
@@ -45,7 +49,7 @@
       min-height: 0;
     }
 
-    /* ── Messages: scrollable, fills remaining space ── */
+    /* ── Messages area scrolls ── */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -56,7 +60,7 @@
       min-height: 0;
     }
 
-    /* ── Suggested prompts bar ── */
+    /* ── Suggested prompts ── */
     .suggested-prompts {
       display: flex;
       flex-wrap: wrap;
@@ -76,15 +80,19 @@
       transition: background .15s, border-color .15s, color .15s;
       white-space: nowrap;
     }
-    .suggested-prompt:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow2); }
+    .suggested-prompt:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── Input row ── */
+    /* ── Input row — always visible ── */
     .chat-input-row {
       display: flex;
       gap: .75rem;
       padding: .75rem 1rem;
       border-top: 1px solid var(--border);
       flex-shrink: 0;
+      background: var(--bg-card);
+    }
+    .chat-input {
+      flex: 1;
     }
 
     /* ── Disclaimer ── */
@@ -92,68 +100,113 @@
       font-size: .72rem;
       color: var(--text-muted);
       text-align: center;
-      padding: .4rem 0 0;
+      padding: .35rem 0 0;
       flex-shrink: 0;
     }
 
-    /* ═══════════════════════════════════
-       TABLET  ≤ 1024px
-       ═══════════════════════════════════ */
+    /* ═══════════════════════════════
+       TABLET ≤ 1024px
+       ═══════════════════════════════ */
     @media (max-width: 1024px) {
       .app-layout { grid-template-columns: 1fr; }
       .main-content { padding: 1rem; }
     }
 
-    /* ═══════════════════════════════════
-       MOBILE  ≤ 768px
-       ═══════════════════════════════════ */
+    /* ═══════════════════════════════
+       MOBILE ≤ 768px
+       ═══════════════════════════════ */
     @media (max-width: 768px) {
-      .app-layout { padding-top: 56px; }
+      html, body { overflow: hidden; }
+
+      .app-layout {
+        grid-template-columns: 1fr;
+        padding-top: 56px;
+        /* subtract top nav (56px) and bottom nav (60px) */
+        height: calc(100vh - 56px - 60px);
+        margin-top: 56px;
+        padding-top: 0;
+      }
 
       .main-content {
-        padding: .6rem .75rem 0;
-        height: calc(100vh - 56px - 60px); /* viewport - topnav - bottomnav */
+        padding: .6rem .75rem .5rem;
+        height: 100%;
         overflow: hidden;
       }
 
-      .chat-page-header { margin-bottom: .5rem; }
+      .chat-page-header {
+        margin-bottom: .4rem;
+      }
       .chat-page-header h2 { font-size: 1.3rem; margin-bottom: 0; }
-      .chat-page-header p  { font-size: .72rem; }
-      .chat-page-header .btn { font-size: .72rem; padding: .35rem .75rem; }
+      .chat-page-header p  { font-size: .7rem; }
+      .chat-page-header .btn { font-size: .72rem; padding: .35rem .7rem; }
       .chat-page-header > div:first-child {
-        width: 36px !important; height: 36px !important; font-size: 1rem !important;
+        width: 34px !important;
+        height: 34px !important;
+        font-size: .95rem !important;
+        flex-shrink: 0;
       }
 
+      /* Chat card: round top corners only */
       .chat-card {
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        border-bottom: none;
       }
 
-      .chat-messages { padding: .75rem; gap: .65rem; }
+      /* Messages area */
+      .chat-messages {
+        padding: .65rem .75rem;
+        gap: .65rem;
+      }
+      .message-bubble {
+        max-width: 88%;
+        font-size: .875rem;
+        padding: .6rem .875rem;
+      }
+      .message-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: .7rem;
+        flex-shrink: 0;
+      }
 
-      .message-bubble { max-width: 90%; font-size: .875rem; padding: .65rem .875rem; }
-      .message-avatar { width: 28px; height: 28px; font-size: .7rem; }
-
-      /* Horizontal scroll for suggested prompts on mobile */
+      /* Suggested prompts: horizontal scroll, no wrap */
       .suggested-prompts {
         flex-wrap: nowrap;
         overflow-x: auto;
-        padding: .45rem .75rem;
+        padding: .4rem .75rem;
         gap: .35rem;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
       .suggested-prompts::-webkit-scrollbar { display: none; }
-      .suggested-prompt { flex-shrink: 0; font-size: .7rem; padding: .25rem .6rem; }
+      .suggested-prompt {
+        flex-shrink: 0;
+        font-size: .7rem;
+        padding: .25rem .6rem;
+      }
 
-      .chat-input-row { padding: .5rem .75rem; gap: .4rem; }
-      .chat-input { font-size: .875rem; padding: .6rem .75rem; }
-      #send-btn { padding: .6rem .875rem; font-size: .82rem; }
+      /* Input row — critical: always above bottom nav */
+      .chat-input-row {
+        padding: .5rem .75rem;
+        gap: .5rem;
+        border-bottom: none;
+      }
+      .chat-input {
+        font-size: 16px; /* prevents iOS zoom on focus */
+        padding: .6rem .75rem;
+      }
+      #send-btn {
+        padding: .6rem .875rem;
+        font-size: .82rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
 
       .chat-disclaimer { display: none; }
     }
 
     @media (max-width: 400px) {
-      .main-content { padding: .4rem .5rem 0; }
+      .main-content { padding: .4rem .5rem .4rem; }
       .chat-page-header h2 { font-size: 1.1rem; }
     }
   </style>
@@ -189,7 +242,7 @@
 
   <main class="main-content">
 
-    <!-- Page Header -->
+    <!-- Header -->
     <div class="chat-page-header">
       <div style="width:48px;height:48px;border-radius:50%;background:var(--accent-glow);border:2px solid rgba(200,241,53,.3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🤖</div>
       <div style="min-width:0;flex:1;">
@@ -205,7 +258,7 @@
       <!-- Messages -->
       <div class="chat-messages" id="chat-messages"></div>
 
-      <!-- Suggested Prompts (hidden after first send) -->
+      <!-- Suggested Prompts -->
       <div class="suggested-prompts" id="suggested-prompts">
         <button class="suggested-prompt">💪 Best chest exercises?</button>
         <button class="suggested-prompt">🍽️ How much protein do I need?</button>
@@ -215,13 +268,14 @@
         <button class="suggested-prompt">🦵 How to fix squat form?</button>
       </div>
 
-      <!-- Input -->
+      <!-- Input — always pinned at bottom of card -->
       <div class="chat-input-row">
-        <input class="chat-input" type="text" id="chat-input"
+        <input class="chat-input form-input" type="text" id="chat-input"
                placeholder="Ask your AI coach anything…"
                maxlength="500" autocomplete="off">
         <button class="btn btn-primary" id="send-btn">Send</button>
       </div>
+
     </div>
 
     <p class="chat-disclaimer">AI advice is for informational purposes only and does not constitute medical advice.</p>
@@ -253,7 +307,7 @@
     });
   });
 
-  // Enter key
+  // Enter to send
   document.getElementById('chat-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
@@ -264,17 +318,17 @@
     history = [];
     document.getElementById('chat-messages').innerHTML = '';
     var sp = document.getElementById('suggested-prompts');
-    if (sp) sp.style.display = 'flex';
+    if (sp) sp.style.display = '';
     addMessage('ai', 'Chat cleared! What would you like to work on?');
   });
 
   async function sendMessage() {
-    const input   = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-    const content = input.value.trim();
+    var input   = document.getElementById('chat-input');
+    var sendBtn = document.getElementById('send-btn');
+    var content = input.value.trim();
     if (!content || sendBtn.disabled) return;
 
-    // Hide suggestions after first real message
+    // Hide prompts after first message to save space
     var sp = document.getElementById('suggested-prompts');
     if (sp) sp.style.display = 'none';
 
@@ -282,14 +336,14 @@
     addMessage('user', content);
     history.push({ role: 'user', content: content });
 
-    const typingEl = addTyping();
+    var typingEl = addTyping();
     sendBtn.disabled = true;
     sendBtn.textContent = '…';
     input.disabled = true;
 
     try {
       var profile = user ? { fitnessLevel: user.fitnessLevel, goals: user.goals } : {};
-      const data = await GymApp.ai.chat(history, profile);
+      var data = await GymApp.ai.chat(history, profile);
       typingEl.remove();
       addMessage('ai', data.reply || 'No response received.');
       history.push({ role: 'assistant', content: data.reply || '' });
@@ -306,43 +360,43 @@
   }
 
   function addMessage(role, html) {
-    const isAI = role === 'ai';
-    const wrap = document.createElement('div');
+    var isAI = role === 'ai';
+    var wrap = document.createElement('div');
     wrap.className = 'message ' + (isAI ? 'ai' : 'user');
-    const initials = (user && user.name) ? user.name[0].toUpperCase() : 'U';
-    const formatted = String(html)
+    var initials = (user && user.name) ? user.name[0].toUpperCase() : 'U';
+    var formatted = String(html)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n/g, '<br>');
     wrap.innerHTML =
       '<div class="message-avatar">' + (isAI ? '🤖' : initials) + '</div>' +
       '<div class="message-bubble">' + formatted + '</div>';
-    const msgs = document.getElementById('chat-messages');
+    var msgs = document.getElementById('chat-messages');
     msgs.appendChild(wrap);
     msgs.scrollTop = msgs.scrollHeight;
     return wrap;
   }
 
   function addTyping() {
-    const wrap = document.createElement('div');
+    var wrap = document.createElement('div');
     wrap.className = 'message ai';
     wrap.innerHTML =
       '<div class="message-avatar">🤖</div>' +
       '<div class="message-bubble"><div class="typing-indicator">' +
       '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>' +
       '</div></div>';
-    const msgs = document.getElementById('chat-messages');
+    var msgs = document.getElementById('chat-messages');
     msgs.appendChild(wrap);
     msgs.scrollTop = msgs.scrollHeight;
     return wrap;
   }
 
-  // Scroll to bottom when keyboard opens on mobile
-  if ('visualViewport' in window) {
-    window.visualViewport.addEventListener('resize', function() {
+  // Keep input in view when mobile keyboard opens
+  document.getElementById('chat-input').addEventListener('focus', function() {
+    setTimeout(function() {
       var msgs = document.getElementById('chat-messages');
       if (msgs) msgs.scrollTop = msgs.scrollHeight;
-    });
-  }
+    }, 300);
+  });
 </script>
 </body>
 </html>
