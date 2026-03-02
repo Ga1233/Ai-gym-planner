@@ -6,13 +6,13 @@
   <title>AI Coach — ForgeFit</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    /* ══ DESKTOP LAYOUT ══ */
+    /* ── Make this page fill the full viewport without scroll ── */
     html, body { height: 100%; overflow: hidden; }
 
     .app-layout {
+      height: 100vh;
       display: grid;
       grid-template-columns: 240px 1fr;
-      height: 100vh;
       padding-top: 64px;
       overflow: hidden;
     }
@@ -22,17 +22,18 @@
       flex-direction: column;
       overflow: hidden;
       padding: 1.5rem 2rem 1rem;
-      min-height: 0;
     }
 
+    /* ── Header row ── */
     .chat-page-header {
       display: flex;
       align-items: center;
       gap: .75rem;
+      margin-bottom: 1rem;
       flex-shrink: 0;
-      margin-bottom: .75rem;
     }
 
+    /* ── Chat card grows to fill space ── */
     .chat-card {
       flex: 1;
       display: flex;
@@ -44,6 +45,7 @@
       min-height: 0;
     }
 
+    /* ── Messages: scrollable, fills remaining space ── */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -54,6 +56,7 @@
       min-height: 0;
     }
 
+    /* ── Suggested prompts bar ── */
     .suggested-prompts {
       display: flex;
       flex-wrap: wrap;
@@ -62,7 +65,6 @@
       border-top: 1px solid var(--border);
       flex-shrink: 0;
     }
-
     .suggested-prompt {
       background: var(--bg-raised);
       border: 1px solid var(--border);
@@ -74,161 +76,85 @@
       transition: background .15s, border-color .15s, color .15s;
       white-space: nowrap;
     }
-    .suggested-prompt:hover { border-color: var(--accent); color: var(--accent); }
+    .suggested-prompt:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow2); }
 
+    /* ── Input row ── */
     .chat-input-row {
       display: flex;
       gap: .75rem;
       padding: .75rem 1rem;
       border-top: 1px solid var(--border);
       flex-shrink: 0;
-      background: var(--bg-card);
     }
 
+    /* ── Disclaimer ── */
     .chat-disclaimer {
       font-size: .72rem;
       color: var(--text-muted);
       text-align: center;
-      padding: .35rem 0 0;
+      padding: .4rem 0 0;
       flex-shrink: 0;
     }
 
-    /* ══ TABLET ≤ 1024px ══ */
+    /* ═══════════════════════════════════
+       TABLET  ≤ 1024px
+       ═══════════════════════════════════ */
     @media (max-width: 1024px) {
       .app-layout { grid-template-columns: 1fr; }
       .main-content { padding: 1rem; }
     }
 
-    /* ══ MOBILE ≤ 768px — FIXED INPUT APPROACH ══ */
+    /* ═══════════════════════════════════
+       MOBILE  ≤ 768px
+       ═══════════════════════════════════ */
     @media (max-width: 768px) {
-      html, body {
-        height: 100%;
-        overflow: hidden;
-        position: fixed;
-        width: 100%;
-      }
-
-      /* Nav bar fixed at top */
-      .nav {
-        position: fixed;
-        top: 0; left: 0; right: 0;
-        z-index: 100;
-        height: 56px;
-      }
-
-      /* Bottom nav fixed */
-      .mobile-bottom-nav {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        z-index: 100;
-        height: 60px;
-      }
-
-      /* Fixed input bar just above bottom nav */
-      .mobile-input-bar {
-        display: flex !important;
-        position: fixed;
-        bottom: 60px;
-        left: 0; right: 0;
-        z-index: 99;
-        background: var(--bg-deep);
-        border-top: 1px solid var(--border);
-        padding: .6rem .75rem;
-        gap: .5rem;
-        align-items: center;
-      }
-
-      .mobile-input-bar .chat-input {
-        flex: 1;
-        font-size: 16px; /* prevents iOS zoom */
-        padding: .65rem .875rem;
-        background: var(--bg-raised);
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius);
-        color: var(--text-primary);
-      }
-      .mobile-input-bar .chat-input:focus {
-        border-color: var(--accent);
-        outline: none;
-      }
-
-      .mobile-input-bar #send-btn {
-        flex-shrink: 0;
-        padding: .65rem 1rem;
-        font-size: .85rem;
-      }
-
-      /* Hide the desktop input row on mobile */
-      .desktop-input-row { display: none !important; }
-
-      /* App layout: fills between top nav and input bar */
-      .app-layout {
-        grid-template-columns: 1fr;
-        height: 100vh;
-        padding-top: 56px;
-        overflow: hidden;
-      }
+      .app-layout { padding-top: 56px; }
 
       .main-content {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
         padding: .6rem .75rem 0;
-        /* top nav + bottom nav + input bar */
-        height: calc(100vh - 56px - 60px - 60px);
+        height: calc(100vh - 56px - 60px); /* viewport - topnav - bottomnav */
+        overflow: hidden;
       }
 
-      .chat-page-header {
-        margin-bottom: .4rem;
-        flex-shrink: 0;
-      }
-      .chat-page-header h2 { font-size: 1.25rem; margin-bottom: 0; }
-      .chat-page-header p  { font-size: .68rem; }
-      .chat-page-header .btn { font-size: .7rem; padding: .3rem .65rem; }
+      .chat-page-header { margin-bottom: .5rem; }
+      .chat-page-header h2 { font-size: 1.3rem; margin-bottom: 0; }
+      .chat-page-header p  { font-size: .72rem; }
+      .chat-page-header .btn { font-size: .72rem; padding: .35rem .75rem; }
       .chat-page-header > div:first-child {
-        width: 32px !important; height: 32px !important; font-size: .85rem !important;
+        width: 36px !important; height: 36px !important; font-size: 1rem !important;
       }
 
       .chat-card {
-        flex: 1;
-        min-height: 0;
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        border-bottom: none;
       }
 
-      .chat-messages {
-        flex: 1;
-        min-height: 0;
-        padding: .65rem .75rem;
-        gap: .6rem;
-      }
+      .chat-messages { padding: .75rem; gap: .65rem; }
 
-      .message-bubble {
-        max-width: 88%;
-        font-size: .875rem;
-        padding: .6rem .875rem;
-      }
-      .message-avatar { width: 28px; height: 28px; font-size: .7rem; flex-shrink: 0; }
+      .message-bubble { max-width: 90%; font-size: .875rem; padding: .65rem .875rem; }
+      .message-avatar { width: 28px; height: 28px; font-size: .7rem; }
 
-      /* Horizontal scroll for suggested prompts */
+      /* Horizontal scroll for suggested prompts on mobile */
       .suggested-prompts {
         flex-wrap: nowrap;
         overflow-x: auto;
-        padding: .4rem .65rem;
-        gap: .3rem;
-        scrollbar-width: none;
+        padding: .45rem .75rem;
+        gap: .35rem;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
       }
       .suggested-prompts::-webkit-scrollbar { display: none; }
-      .suggested-prompt { flex-shrink: 0; font-size: .68rem; padding: .22rem .55rem; }
+      .suggested-prompt { flex-shrink: 0; font-size: .7rem; padding: .25rem .6rem; }
 
-      /* Hide disclaimer on mobile */
+      .chat-input-row { padding: .5rem .75rem; gap: .4rem; }
+      .chat-input { font-size: .875rem; padding: .6rem .75rem; }
+      #send-btn { padding: .6rem .875rem; font-size: .82rem; }
+
       .chat-disclaimer { display: none; }
     }
 
     @media (max-width: 400px) {
       .main-content { padding: .4rem .5rem 0; }
-      .chat-page-header h2 { font-size: 1.05rem; }
+      .chat-page-header h2 { font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -262,7 +188,8 @@
   </aside>
 
   <main class="main-content">
-    <!-- Header -->
+
+    <!-- Page Header -->
     <div class="chat-page-header">
       <div style="width:48px;height:48px;border-radius:50%;background:var(--accent-glow);border:2px solid rgba(200,241,53,.3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🤖</div>
       <div style="min-width:0;flex:1;">
@@ -274,8 +201,11 @@
 
     <!-- Chat Card -->
     <div class="chat-card">
+
+      <!-- Messages -->
       <div class="chat-messages" id="chat-messages"></div>
 
+      <!-- Suggested Prompts (hidden after first send) -->
       <div class="suggested-prompts" id="suggested-prompts">
         <button class="suggested-prompt">💪 Best chest exercises?</button>
         <button class="suggested-prompt">🍽️ How much protein do I need?</button>
@@ -285,23 +215,18 @@
         <button class="suggested-prompt">🦵 How to fix squat form?</button>
       </div>
 
-      <!-- Desktop input (hidden on mobile) -->
-      <div class="chat-input-row desktop-input-row">
-        <input class="chat-input form-input" type="text" id="chat-input-desktop"
-               placeholder="Ask your AI coach anything…" maxlength="500" autocomplete="off">
-        <button class="btn btn-primary" id="send-btn-desktop">Send</button>
+      <!-- Input -->
+      <div class="chat-input-row">
+        <input class="chat-input" type="text" id="chat-input"
+               placeholder="Ask your AI coach anything…"
+               maxlength="500" autocomplete="off">
+        <button class="btn btn-primary" id="send-btn">Send</button>
       </div>
     </div>
 
     <p class="chat-disclaimer">AI advice is for informational purposes only and does not constitute medical advice.</p>
-  </main>
-</div>
 
-<!-- Mobile input bar — fixed above bottom nav -->
-<div class="mobile-input-bar" style="display:none;">
-  <input class="chat-input" type="text" id="chat-input-mobile"
-         placeholder="Ask your AI coach…" maxlength="500" autocomplete="off">
-  <button class="btn btn-primary" id="send-btn-mobile">Send</button>
+  </main>
 </div>
 
 <div id="toast-container"></div>
@@ -310,57 +235,46 @@
 <script>
   if (!GymApp.requireAuth()) { throw new Error('auth'); }
 
-  var user = GymApp.auth.currentUser();
-  var history = [];
+  const user = GymApp.auth.currentUser();
+  let history = [];
 
-  // ── Unified input/button references ──────────────────────
-  // On mobile the fixed bar input is used; on desktop the card input.
-  function getInput()   { return window.innerWidth <= 768 ? document.getElementById('chat-input-mobile')  : document.getElementById('chat-input-desktop');  }
-  function getSendBtn() { return window.innerWidth <= 768 ? document.getElementById('send-btn-mobile') : document.getElementById('send-btn-desktop'); }
-
-  // ── Greeting ──────────────────────────────────────────────
+  // Greeting
   var greeting = 'Hey ' + (user && user.name ? user.name.split(' ')[0] : 'there') + '! 💪 I\'m your AI fitness coach.';
   if (user && user.fitnessLevel) greeting += ' I know you\'re a <strong>' + user.fitnessLevel + '</strong> athlete';
   if (user && user.goals && user.goals.length) greeting += ' working toward <strong>' + user.goals.join(', ').replace(/_/g,' ') + '</strong>';
   greeting += '.<br><br>Ask me anything — training, nutrition, recovery, form tips. Let\'s get to work!';
   addMessage('ai', greeting);
 
-  // ── Suggested prompts ────────────────────────────────────
+  // Suggested prompts
   document.querySelectorAll('.suggested-prompt').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      var inp = getInput();
-      if (inp) inp.value = btn.textContent.slice(2).trim();
+      document.getElementById('chat-input').value = btn.textContent.slice(2).trim();
       sendMessage();
     });
   });
 
-  // ── Wire both send buttons and inputs ────────────────────
-  ['chat-input-desktop','chat-input-mobile'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
+  // Enter key
+  document.getElementById('chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
-  document.getElementById('send-btn-desktop').addEventListener('click', sendMessage);
-  document.getElementById('send-btn-mobile').addEventListener('click', sendMessage);
 
-  // ── Clear ────────────────────────────────────────────────
+  document.getElementById('send-btn').addEventListener('click', sendMessage);
+
   document.getElementById('clear-btn').addEventListener('click', function() {
     history = [];
     document.getElementById('chat-messages').innerHTML = '';
     var sp = document.getElementById('suggested-prompts');
-    if (sp) sp.style.display = '';
+    if (sp) sp.style.display = 'flex';
     addMessage('ai', 'Chat cleared! What would you like to work on?');
   });
 
-  // ── Send ─────────────────────────────────────────────────
   async function sendMessage() {
-    var input   = getInput();
-    var sendBtn = getSendBtn();
-    if (!input) return;
-    var content = input.value.trim();
+    const input   = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const content = input.value.trim();
     if (!content || sendBtn.disabled) return;
 
+    // Hide suggestions after first real message
     var sp = document.getElementById('suggested-prompts');
     if (sp) sp.style.display = 'none';
 
@@ -368,20 +282,14 @@
     addMessage('user', content);
     history.push({ role: 'user', content: content });
 
-    var typingEl = addTyping();
-    // Disable both buttons
-    ['send-btn-desktop','send-btn-mobile'].forEach(function(id){
-      var b = document.getElementById(id);
-      if (b) { b.disabled = true; b.textContent = '…'; }
-    });
-    ['chat-input-desktop','chat-input-mobile'].forEach(function(id){
-      var el = document.getElementById(id);
-      if (el) el.disabled = true;
-    });
+    const typingEl = addTyping();
+    sendBtn.disabled = true;
+    sendBtn.textContent = '…';
+    input.disabled = true;
 
     try {
       var profile = user ? { fitnessLevel: user.fitnessLevel, goals: user.goals } : {};
-      var data = await GymApp.ai.chat(history, profile);
+      const data = await GymApp.ai.chat(history, profile);
       typingEl.remove();
       addMessage('ai', data.reply || 'No response received.');
       history.push({ role: 'assistant', content: data.reply || '' });
@@ -390,49 +298,50 @@
       typingEl.remove();
       addMessage('ai', '⚠️ ' + (err.message || 'Could not reach AI. Check server and .env.'));
     } finally {
-      ['send-btn-desktop','send-btn-mobile'].forEach(function(id){
-        var b = document.getElementById(id);
-        if (b) { b.disabled = false; b.textContent = 'Send'; }
-      });
-      ['chat-input-desktop','chat-input-mobile'].forEach(function(id){
-        var el = document.getElementById(id);
-        if (el) el.disabled = false;
-      });
-      if (input) input.focus();
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Send';
+      input.disabled = false;
+      input.focus();
     }
   }
 
-  // ── Render message ───────────────────────────────────────
   function addMessage(role, html) {
-    var isAI = role === 'ai';
-    var wrap = document.createElement('div');
+    const isAI = role === 'ai';
+    const wrap = document.createElement('div');
     wrap.className = 'message ' + (isAI ? 'ai' : 'user');
-    var initials = (user && user.name) ? user.name[0].toUpperCase() : 'U';
-    var formatted = String(html)
+    const initials = (user && user.name) ? user.name[0].toUpperCase() : 'U';
+    const formatted = String(html)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n/g, '<br>');
     wrap.innerHTML =
       '<div class="message-avatar">' + (isAI ? '🤖' : initials) + '</div>' +
       '<div class="message-bubble">' + formatted + '</div>';
-    var msgs = document.getElementById('chat-messages');
+    const msgs = document.getElementById('chat-messages');
     msgs.appendChild(wrap);
     msgs.scrollTop = msgs.scrollHeight;
     return wrap;
   }
 
-  // ── Typing indicator ─────────────────────────────────────
   function addTyping() {
-    var wrap = document.createElement('div');
+    const wrap = document.createElement('div');
     wrap.className = 'message ai';
     wrap.innerHTML =
       '<div class="message-avatar">🤖</div>' +
       '<div class="message-bubble"><div class="typing-indicator">' +
       '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>' +
       '</div></div>';
-    var msgs = document.getElementById('chat-messages');
+    const msgs = document.getElementById('chat-messages');
     msgs.appendChild(wrap);
     msgs.scrollTop = msgs.scrollHeight;
     return wrap;
+  }
+
+  // Scroll to bottom when keyboard opens on mobile
+  if ('visualViewport' in window) {
+    window.visualViewport.addEventListener('resize', function() {
+      var msgs = document.getElementById('chat-messages');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    });
   }
 </script>
 </body>
